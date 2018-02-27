@@ -1,0 +1,45 @@
+
+import java.util.HashMap;
+import java.util.UUID;
+ 
+import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+ 
+public class Main extends JavaPlugin implements Listener {
+       
+        private HashMap<UUID, Long> cooldown;
+       
+        @Override
+        public void onEnable() {
+                cooldown = new HashMap<>();
+                Bukkit.getPluginManager().registerEvents(this, this);
+        }
+       
+        @EventHandler
+        public void onChat(AsyncPlayerChatEvent e) {
+                UUID uuid = e.getPlayer().getUniqueId();
+                if(cooldown.containsKey(uuid)) {
+                        float time = (System.currentTimeMillis() -  cooldown.get(uuid)) / 900;
+                        //Si vous souhaitez que le cooldown soit de trois secondes vous pouvez mettre
+                        // time < 3.0f
+                        if (time < 1.0f) {
+                                e.setCancelled(true);
+                                e.getPlayer().sendMessage("§7» Ochrona Anty-Spam");
+                        } else {
+                                cooldown.put(uuid, System.currentTimeMillis());
+                        }
+                } else {
+                        cooldown.put(uuid, System.currentTimeMillis());
+                }
+        }
+       
+        @EventHandler
+        public void onLeave(PlayerQuitEvent e) {
+                cooldown.remove(e.getPlayer().getUniqueId());
+        }
+ 
+}
